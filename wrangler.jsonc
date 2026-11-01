@@ -1,0 +1,11 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "persona",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./public"
+  },
+  "routes": [
+    { "pattern": "persona.duds.dev", "custom_domain": true }
+  ]
+}

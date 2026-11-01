@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0B1F14">
+  <meta name="description" content="Meet Lucas Costa. Learn his story and rehearse all 22 interview answers, one conversation at a time.">
+  <title>Lucas Costa · Interview studio</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="#persona" aria-label="Interview studio home"><span class="brand-mark" aria-hidden="true">lc<span>↗</span></span><span>Interview<br><strong>studio.</strong></span></a>
+      <div class="header-progress"><span class="status-dot" aria-hidden="true"></span><span id="header-known">0 / 22 memorized</span><progress id="header-progress" max="22" value="0" aria-label="Answers memorized"></progress></div>
+    </div>
+    <nav class="tabs" aria-label="Study sections">
+      <a href="#persona" data-tab="persona">Persona</a>
+      <a href="#memorize" data-tab="memorize">Memorize</a>
+      <a href="#flashcards" data-tab="flashcards">Flashcards</a>
+      <a href="#practice" data-tab="practice">Practice <span class="desktop-label">(type)</span></a>
+      <a href="#exam" data-tab="exam">Interview</a>
+    </nav>
+  </header>
+  <main id="main" tabindex="-1">
+    <p id="loading" class="notice" role="status">Opening your interview workbook…</p>
+    <section id="persona" class="view" aria-labelledby="persona-heading" hidden></section>
+    <section id="memorize" class="view" aria-labelledby="memorize-heading" hidden>
+      <div class="section-heading"><div><p class="eyebrow">Learn the script</p><h1 id="memorize-heading">One answer at a time.</h1><p>Read it. Say it. Cover it. Keep the exact words.</p></div><span class="section-count">22 questions</span></div>
+      <div class="toolbar">
+        <label>Memory mode<select id="memory-mode"><option value="full">Full text</option><option value="first">First letters</option><option value="cloze">Cloze</option><option value="hidden">Hidden</option></select></label>
+        <label class="rate-control">Voice speed <output id="rate-value" for="speech-rate">0.9×</output><input id="speech-rate" type="range" min="0.7" max="1.1" step="0.1" value="0.9"></label>
+        <button id="stop-speech" class="subtle" type="button">Stop audio</button>
+      </div>
+      <p id="speech-note" class="helper">Listen in English, then repeat out loud. Voice playback needs a browser with text-to-speech.</p>
+      <div id="question-list" class="question-list"></div>
+    </section>
+    <section id="flashcards" class="view study-view" aria-labelledby="flashcards-heading" hidden>
+      <div class="section-heading"><div><p class="eyebrow">Recall, not recognition</p><h1 id="flashcards-heading">Make it stick.</h1><p>Say the answer before you turn the card.</p></div><span id="flash-known" class="section-count">0/22 known</span></div>
+      <div class="flash-top"><span id="flash-position" class="eyebrow"></span><div class="button-row"><button id="shuffle" class="subtle" type="button">Shuffle</button><button id="reset-known" class="subtle" type="button">Reset progress</button></div></div>
+      <button id="flash-card" class="flash-card" type="button" aria-label="Flip flashcard"><span id="flash-side" class="eyebrow">Question</span><span id="flash-text" class="flash-text"></span><span id="flash-cue" class="cue"></span><span class="flash-hint">Tap to flip · Space on keyboard</span></button>
+      <div class="flash-actions"><button id="flash-prev" class="subtle" type="button" aria-label="Previous flashcard">← Previous</button><div class="button-row"><button id="again" class="secondary" type="button">Again</button><button id="got-it" class="primary" type="button">Got it ✓</button></div><button id="flash-next" class="subtle" type="button" aria-label="Next flashcard">Next →</button></div>
+      <p class="helper center">Left / right arrows to navigate. Swipe on your phone. “Again” puts a card back into your learning pile.</p>
+    </section>
+    <section id="practice" class="view study-view" aria-labelledby="practice-heading" hidden>
+      <div class="section-heading"><div><p class="eyebrow">Find the missing words</p><h1 id="practice-heading">From memory, please.</h1><p>Type the script or dictate it. Then see what to work on.</p></div></div>
+      <div class="practice-panel panel"><div class="question-picker"><label for="practice-select">Choose a question</label><div class="picker-row"><select id="practice-select"></select><button id="practice-random" class="secondary" type="button">Random ↗</button></div></div><h2 id="practice-question"></h2><label for="practice-input">Your answer</label><textarea id="practice-input" rows="7" placeholder="Try without looking at the answer…" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea><div class="button-row"><button id="check-answer" class="primary" type="button">Check answer</button><button id="dictate" class="secondary" type="button" hidden>🎤 Speak answer</button><span id="dictation-status" class="helper" role="status"></span></div></div>
+      <div id="practice-result" class="panel result-panel" aria-live="polite" hidden></div>
+    </section>
+    <section id="exam" class="view study-view" aria-labelledby="exam-heading" hidden>
+      <div class="section-heading"><div><p class="eyebrow">Your turn in the hot seat</p><h1 id="exam-heading">Let’s talk, Lucas.</h1><p>A shuffled interview. No notes. Just you and your story.</p></div></div>
+      <div id="exam-content" class="panel exam-panel"></div>
+    </section>
+    <p id="app-status" class="sr-only" role="status" aria-live="polite"></p>
+  </main>
+  <footer><span>Germinare Tech · Business 3 · Unit 3</span><span>A fictional candidate. A real chance to practice.</span></footer>
+</body>
+</html>

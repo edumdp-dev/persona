@@ -1,0 +1,174 @@
+{
+  "persona": {
+    "name": "Lucas Costa",
+    "age": 24,
+    "city": "São Paulo, Brazil",
+    "education": "Bachelor's in Business Administration — FEA-USP (University of São Paulo), class of 2024",
+    "company": "PicPay",
+    "position": "Junior Customer Experience Analyst (CX)",
+    "previousJob": "1.5-year internship at Itaú Unibanco, Customer Service Operations team",
+    "achievement": "Built an Excel dashboard that cut customer response time by 20%",
+    "languages": "Portuguese (native), English (advanced), Spanish (basic)",
+    "hobbies": "Soccer, running, cooking",
+    "animal": "Dolphin",
+    "traits": ["Organized", "Calm under pressure", "Good communicator", "Data-curious", "Team player"],
+    "tagline": "I like solving problems for real people — with data and empathy."
+  },
+  "questions": [
+    {
+      "id": 1,
+      "q": "Can you tell me a little about yourself and describe your background in brief?",
+      "a": "My name is Lucas Costa, I'm 24 and I graduated in Business Administration at FEA-USP. I did a one-and-a-half-year internship at Itaú in customer service operations. I love solving customer problems using data.",
+      "pt": "Me chamo Lucas Costa, 24 anos, formado em Administração na FEA-USP. Estagiei 1 ano e meio no Itaú em operações de atendimento. Gosto de resolver problemas de clientes com dados.",
+      "cue": "Name → 24 → FEA-USP → Itaú → data"
+    },
+    {
+      "id": 2,
+      "q": "How did you hear about the position?",
+      "a": "I saw the job post on PicPay's LinkedIn page. A friend who works here also told me the team is great, so I applied right away.",
+      "pt": "Vi a vaga no LinkedIn do PicPay. Um amigo que trabalha aqui disse que o time é ótimo, então me candidatei na hora.",
+      "cue": "LinkedIn + friend"
+    },
+    {
+      "id": 3,
+      "q": "What do you know about our company?",
+      "a": "PicPay started in 2012 in Vitória as a payment app and today it's one of the biggest digital banks in Brazil, with more than 60 million users. You offer Pix, credit cards, loans and investments, all in one app.",
+      "pt": "O PicPay começou em 2012 em Vitória como app de pagamento e hoje é um dos maiores bancos digitais do Brasil, com mais de 60 milhões de usuários. Oferece Pix, cartão, empréstimo e investimentos num só app.",
+      "cue": "2012 → Vitória → 60 million → all in one app"
+    },
+    {
+      "id": 4,
+      "q": "Why do you want this job?",
+      "a": "Because I want to help millions of people have a simple and good experience with their money. PicPay is innovative and customer-focused, and that matches what I believe in.",
+      "pt": "Porque quero ajudar milhões de pessoas a ter uma experiência simples e boa com o dinheiro. O PicPay é inovador e focado no cliente, e isso combina comigo.",
+      "cue": "Millions of people → simple → innovative"
+    },
+    {
+      "id": 5,
+      "q": "What is your 'dream' job?",
+      "a": "My dream job is to lead a Customer Experience team at a big tech company. I want to make products easier for everyone to use.",
+      "pt": "Meu emprego dos sonhos é liderar um time de Experiência do Cliente numa grande empresa de tecnologia, deixando os produtos mais fáceis para todos.",
+      "cue": "Lead CX team → big tech → easier"
+    },
+    {
+      "id": 6,
+      "q": "What is leadership in your opinion?",
+      "a": "For me, leadership is giving the example and helping people grow. A good leader listens, gives clear goals and takes responsibility when things go wrong.",
+      "pt": "Liderança é dar o exemplo e ajudar as pessoas a crescer. Um bom líder escuta, dá metas claras e assume a responsabilidade quando algo dá errado.",
+      "cue": "Example → grow → listen, goals, responsibility"
+    },
+    {
+      "id": 7,
+      "q": "Why should we hire you? What makes you a good fit for this position?",
+      "a": "I already have experience in customer service at a big bank, and I know how to use data to improve it. I learn fast, I'm organized and I really care about customers.",
+      "pt": "Já tenho experiência em atendimento num grande banco e sei usar dados para melhorá-lo. Aprendo rápido, sou organizado e me importo de verdade com o cliente.",
+      "cue": "Experience → data → fast, organized, care"
+    },
+    {
+      "id": 8,
+      "q": "What are your greatest professional strengths?",
+      "a": "My greatest strengths are organization and communication. I can explain complex problems in a simple way, and I always deliver on time.",
+      "pt": "Minhas maiores forças são organização e comunicação. Explico problemas complexos de forma simples e sempre entrego no prazo.",
+      "cue": "Organization + communication → on time"
+    },
+    {
+      "id": 9,
+      "q": "What do you consider your weaknesses?",
+      "a": "Sometimes I'm a perfectionist and spend too much time on details. Now I set deadlines for each task, and that helps me a lot.",
+      "pt": "Às vezes sou perfeccionista e gasto tempo demais em detalhes. Agora defino prazos para cada tarefa, e isso me ajuda muito.",
+      "cue": "Perfectionist → deadlines"
+    },
+    {
+      "id": 10,
+      "q": "How do you deal with pressure or stressful situations?",
+      "a": "I stay calm and make a list of priorities. I solve the most urgent things first, and I talk to my team if I need help.",
+      "pt": "Fico calmo e faço uma lista de prioridades. Resolvo o mais urgente primeiro e falo com o time se precisar de ajuda.",
+      "cue": "Calm → priorities → urgent first → team"
+    },
+    {
+      "id": 11,
+      "q": "What is your greatest professional achievement?",
+      "a": "At Itaú, I created an Excel dashboard to track customer complaints. It helped my team reduce response time by 20%.",
+      "pt": "No Itaú, criei um dashboard em Excel para acompanhar reclamações de clientes. Ajudou o time a reduzir o tempo de resposta em 20%.",
+      "cue": "Itaú → Excel dashboard → 20% faster"
+    },
+    {
+      "id": 12,
+      "q": "Tell me about a challenge or conflict you've faced at work, and how you dealt with it.",
+      "a": "Once, two colleagues disagreed about how to answer a difficult client. I organized a quick meeting, we listened to both ideas and combined them. The client was happy and the team got closer.",
+      "pt": "Uma vez dois colegas discordaram sobre como responder um cliente difícil. Organizei uma reunião rápida, ouvimos as duas ideias e juntamos. O cliente ficou feliz e o time se aproximou.",
+      "cue": "2 colleagues → meeting → combine → happy client"
+    },
+    {
+      "id": 13,
+      "q": "Where do you see yourself in five years?",
+      "a": "In five years, I see myself as a senior analyst or coordinator here at PicPay. I want to lead projects that improve the customer experience.",
+      "pt": "Em cinco anos me vejo como analista sênior ou coordenador aqui no PicPay, liderando projetos que melhoram a experiência do cliente.",
+      "cue": "Senior / coordinator → lead projects"
+    },
+    {
+      "id": 14,
+      "q": "What are you looking for in a new position?",
+      "a": "I'm looking for a place where I can learn every day and grow my career. I also want a young team and real challenges.",
+      "pt": "Procuro um lugar onde eu aprenda todo dia e cresça na carreira. Também quero um time jovem e desafios reais.",
+      "cue": "Learn → grow → young team → challenges"
+    },
+    {
+      "id": 15,
+      "q": "How would your boss and co-workers describe you?",
+      "a": "They would say I'm reliable, friendly and always ready to help. My boss used to say I was the most organized person on the team.",
+      "pt": "Diriam que sou confiável, simpático e sempre disposto a ajudar. Meu chefe dizia que eu era o mais organizado do time.",
+      "cue": "Reliable, friendly, helpful → most organized"
+    },
+    {
+      "id": 16,
+      "q": "How do you deal with pressure or stressful situations?",
+      "a": "I stay calm and make a list of priorities. I solve the most urgent things first, and I talk to my team if I need help.",
+      "pt": "Fico calmo e faço uma lista de prioridades. Resolvo o mais urgente primeiro e falo com o time se precisar de ajuda.",
+      "cue": "Same as #10: Calm → priorities → urgent first → team",
+      "duplicateOf": 10
+    },
+    {
+      "id": 17,
+      "q": "What would you do in your first 90 days in this position?",
+      "a": "First, I would learn about the products, the team and the main customer problems. Then, I would look at the data and suggest one quick improvement.",
+      "pt": "Primeiro aprenderia sobre os produtos, o time e os principais problemas dos clientes. Depois analisaria os dados e sugeriria uma melhoria rápida.",
+      "cue": "Learn → data → one quick improvement"
+    },
+    {
+      "id": 18,
+      "q": "What do you like to do outside of work?",
+      "a": "I love playing soccer with my friends on the weekends and going running. I also like cooking for my family.",
+      "pt": "Adoro jogar futebol com amigos no fim de semana e correr. Também gosto de cozinhar para minha família.",
+      "cue": "Soccer → running → cooking"
+    },
+    {
+      "id": 19,
+      "q": "If you were an animal, which animal would you want to be? Why?",
+      "a": "I would be a dolphin, because dolphins are smart, friendly and always work in groups. Just like me in a team!",
+      "pt": "Eu seria um golfinho, porque golfinhos são inteligentes, amigáveis e sempre trabalham em grupo. Igual a mim num time!",
+      "cue": "Dolphin → smart, friendly, groups"
+    },
+    {
+      "id": 20,
+      "q": "Briefly, tell us something about your previous working experiences.",
+      "a": "I was an intern at Itaú for one and a half years, in customer service operations. I analyzed complaints, created reports and helped improve our processes.",
+      "pt": "Fui estagiário no Itaú por um ano e meio, em operações de atendimento. Analisava reclamações, criava relatórios e ajudava a melhorar processos.",
+      "cue": "Itaú 1.5 years → complaints, reports, processes"
+    },
+    {
+      "id": 21,
+      "q": "Flexibility and Salary. How important are they in your opinion?",
+      "a": "Both are important, but for me learning and growth come first. A fair salary and some flexibility, like a hybrid model, help me be more productive.",
+      "pt": "Os dois são importantes, mas para mim aprendizado e crescimento vêm primeiro. Um salário justo e alguma flexibilidade, como modelo híbrido, me deixam mais produtivo.",
+      "cue": "Both important → growth first → fair + hybrid"
+    },
+    {
+      "id": 22,
+      "q": "Do you have any questions for us?",
+      "a": "Yes! What does a typical day look like for this team? And what are the next steps in the process?",
+      "pt": "Sim! Como é um dia típico neste time? E quais são os próximos passos do processo?",
+      "cue": "Typical day? → Next steps?"
+    }
+  ]
+}
