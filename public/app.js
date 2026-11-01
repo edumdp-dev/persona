@@ -18,6 +18,52 @@ const escapeHTML = value => String(value).replace(/[&<>"']/g, char => ({ '&': '&
 const announce = message => { $('#app-status').textContent = message; };
 const questionById = id => questions.find(question => question.id === Number(id));
 
+const icons = {
+  user: '<path d="M20 21v-2a7 7 0 0 0-14 0v2"/><circle cx="13" cy="7" r="4"/>',
+  'book-open': '<path d="M12 5v16M3 3h4a5 5 0 0 1 5 2 5 5 0 0 1 5-2h4v16h-4a7 7 0 0 0-5 2 7 7 0 0 0-5-2H3z"/>',
+  layers: '<path d="m12 3 10 5-10 5L2 8zM2 12l10 5 10-5M2 16l10 5 10-5"/>',
+  pencil: '<path d="m16 3 5 5-12 12-6 1 1-6zM14 5l5 5"/>',
+  mic: '<rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8"/>',
+  'graduation-cap': '<path d="m2 9 10-5 10 5-10 5zM6 11v6c4 3 8 3 12 0v-6M22 9v7"/>',
+  briefcase: '<rect x="3" y="7" width="18" height="14" rx="2"/><path d="M8 7V3h8v4M3 12a20 20 0 0 0 18 0M12 11v4"/>',
+  trophy: '<path d="M8 3h8v6a4 4 0 0 1-8 0zM8 5H4v3a4 4 0 0 0 4 4M16 5h4v3a4 4 0 0 1-4 4M12 13v5M8 21h8M10 18h4v3"/>',
+  languages: '<path d="M3 5h12M9 3v2M5 5c0 6 4 9 8 11M13 5c0 6-4 9-9 12M13 21l5-12 5 12M15 17h6"/>',
+  heart: '<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z"/>',
+  waves: '<path d="M2 6c3-4 5 4 10 0s7 4 10 0M2 12c3-4 5 4 10 0s7 4 10 0M2 18c3-4 5 4 10 0s7 4 10 0"/>',
+  'volume-2': '<path d="m11 5-6 4H2v6h3l6 4zM15 8a6 6 0 0 1 0 8M18 5a10 10 0 0 1 0 14"/>',
+  square: '<rect x="5" y="5" width="14" height="14" rx="2"/>',
+  shuffle: '<path d="M3 6h3c5 0 7 12 12 12h3M18 15l3 3-3 3M3 18h3c2 0 3-2 4-4M14 8c1-1 2-2 4-2h3M18 3l3 3-3 3"/>',
+  'rotate-ccw': '<path d="M3 10a9 9 0 1 1 2 9M3 4v6h6"/>',
+  'chevron-left': '<path d="m15 18-6-6 6-6"/>',
+  'chevron-right': '<path d="m9 18 6-6-6-6"/>',
+  check: '<path d="m5 12 4 4L19 6"/>',
+  x: '<path d="m6 6 12 12M6 18 18 6"/>',
+  download: '<path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/>',
+  timer: '<circle cx="12" cy="14" r="8"/><path d="M12 10v4l3 2M9 2h6M12 2v4M19 5l2 2"/>',
+  play: '<path d="m8 4 13 8-13 8z"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M5 19l1.5-1.5M17.5 6.5 19 5"/>',
+  moon: '<path d="M20.8 13A9 9 0 0 1 11 3.2 9 9 0 1 0 20.8 13z"/>'
+};
+const icon = name => `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icons[name] || ''}</svg>`;
+
+function setupTheme() {
+  document.querySelectorAll('[data-icon]').forEach(element => { element.innerHTML = icon(element.dataset.icon); });
+  const button = $('#theme-toggle');
+  const sync = () => {
+    const dark = document.documentElement.dataset.theme === 'dark';
+    button.setAttribute('aria-pressed', String(dark));
+    button.setAttribute('aria-label', `Switch to ${dark ? 'light' : 'dark'} theme`);
+    $('meta[name="theme-color"]').content = dark ? '#0f1115' : '#f7f8fa';
+  };
+  sync();
+  button.addEventListener('click', () => {
+    const theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = theme;
+    try { localStorage.setItem('lc-theme', theme); } catch { /* Theme remains available for this session. */ }
+    sync();
+  });
+}
+
 function shuffled(items) {
   const result = [...items];
   for (let i = result.length - 1; i > 0; i--) {
@@ -58,6 +104,7 @@ function updateProgress(save = false) {
   $('#header-progress').max = questions.length;
   $('#header-progress').value = known.size;
   $('#flash-known').textContent = `${known.size}/${questions.length} known`;
+  $('#flash-celebration').hidden = known.size !== questions.length || !questions.length;
   if (save) {
     try { localStorage.setItem('lc-known', JSON.stringify([...known])); }
     catch { announce('Your browser could not save progress. Your current session is still available.'); }
@@ -65,8 +112,8 @@ function updateProgress(save = false) {
 }
 
 function renderPersona(persona) {
-  const facts = [['Education', persona.education], ['Previous job', persona.previousJob], ['Proudest achievement', persona.achievement], ['Languages', persona.languages], ['Outside of work', persona.hobbies], ['If I were an animal', persona.animal]];
-  $('#persona').innerHTML = `<div class="hero"><div class="hero-copy"><p class="eyebrow">Meet your interview persona</p><h1 id="persona-heading">Lucas<span>Costa.</span></h1><p class="hero-tagline">${escapeHTML(persona.tagline)}</p><div class="role-label">Applying for<strong>${escapeHTML(persona.position)}</strong>at <b class="company">${escapeHTML(persona.company)}</b></div></div><div class="portrait-panel"><span class="portrait-fallback" role="img" aria-label="Lucas Costa initials">LC</span><img id="portrait" src="./lucas.png" alt="Portrait of Lucas Costa" onerror="this.hidden=true"><div class="portrait-note"><span><strong>${escapeHTML(persona.name)}, ${persona.age}</strong>${escapeHTML(persona.city)}</span><span class="candidate-id">CANDIDATE<br>LC / 024</span></div></div></div><div class="intro-line"><h2>The person behind the answers.</h2><a class="download" href="./Lucas_Costa_Interview_Answers.pdf" download>Download answered PDF <span aria-hidden="true">↓</span></a></div><div class="facts-grid">${facts.map(([label, value]) => `<article class="fact"><h3>${escapeHTML(label)}</h3><p>${escapeHTML(value)}</p></article>`).join('')}</div><div class="traits" aria-label="Personality traits">${persona.traits.map(trait => `<span class="chip">${escapeHTML(trait)}</span>`).join('')}</div><aside class="cheat-strip"><h2>Quick facts to never forget</h2><div class="cheat-facts">${['Lucas Costa', '24 years old', 'FEA-USP', 'Itaú · 1.5 years', 'Excel dashboard · 20%', 'Dolphin', 'Soccer / running / cooking'].map(fact => `<span>${fact}</span>`).join('')}</div></aside>`;
+  const facts = [['graduation-cap', 'Education', persona.education], ['briefcase', 'Previous job', persona.previousJob], ['trophy', 'Proudest achievement', persona.achievement], ['languages', 'Languages', persona.languages], ['heart', 'Outside of work', persona.hobbies], ['waves', 'If I were an animal', persona.animal]];
+  $('#persona').innerHTML = `<div class="hero"><div class="hero-copy"><p class="eyebrow">Meet your interview persona</p><h1 id="persona-heading">Lucas Costa.</h1><p class="hero-tagline">${escapeHTML(persona.tagline)}</p><div class="role-label">Applying for <strong>${escapeHTML(persona.position)}</strong> at <b class="company">${escapeHTML(persona.company)}</b></div><p class="persona-meta">${escapeHTML(persona.name)}, ${escapeHTML(persona.age)} · ${escapeHTML(persona.city)}</p></div><div class="portrait-panel"><span class="portrait-fallback" role="img" aria-label="Lucas Costa initials">LC</span><img id="portrait" src="./lucas.png" alt="Portrait of Lucas Costa" onerror="this.hidden=true"></div></div><div class="intro-line"><h2>The person behind the answers.</h2><a class="download" href="./Lucas_Costa_Interview_Answers.pdf" download>${icon('download')} Download answered PDF</a></div><div class="facts-grid">${facts.map(([symbol, label, value]) => `<article class="fact"><h3>${icon(symbol)}${escapeHTML(label)}</h3><p>${escapeHTML(value)}</p>${symbol === 'waves' ? '<pre class="ascii-art" aria-hidden="true">      __\n  ___/ o&#92;_\n &lt;___  __ /   ~ ~\n     &#92;/</pre>' : ''}</article>`).join('')}</div><div class="traits" aria-label="Personality traits">${persona.traits.map(trait => `<span class="chip">${escapeHTML(trait)}</span>`).join('')}</div><aside class="cheat-strip"><h2>Quick facts to remember</h2><div class="cheat-facts">${['Lucas Costa', '24 years old', 'FEA-USP', 'Itaú · 1.5 years', 'Excel dashboard · 20%', 'Dolphin', 'Soccer / running / cooking'].map(fact => `<span>${fact}</span>`).join('')}</div></aside>`;
 }
 
 function firstLetters(text) {
@@ -91,7 +138,7 @@ function answerMarkup(answer, mode) {
 
 function renderMemorize() {
   const mode = $('#memory-mode').value;
-  $('#question-list').innerHTML = questions.map(question => `<article class="question-card" data-question="${question.id}"><div class="question-top"><span class="q-number">${String(question.id).padStart(2, '0')} /</span><div><h2>${escapeHTML(question.q)}</h2>${question.duplicateOf ? `<span class="badge">Same answer as #${question.duplicateOf}</span>` : ''}</div><button type="button" class="audio-btn" data-speak="${question.id}" aria-label="Listen to answer ${question.id}" ${canSpeak ? '' : 'disabled'}>🔊</button></div><div class="answer" ${mode === 'first' ? 'aria-label="First-letter memory prompt"' : ''}>${answerMarkup(question.a, mode)}</div><div class="question-bottom"><span class="cue"><span class="cue-label">Memory cue</span>${escapeHTML(question.cue)}</span><button type="button" class="subtle translation-toggle" aria-expanded="false" aria-controls="translation-${question.id}">Show Portuguese</button></div><p lang="pt-BR" class="translation" id="translation-${question.id}" hidden>${escapeHTML(question.pt)}</p></article>`).join('');
+  $('#question-list').innerHTML = questions.map(question => `<article class="question-card" data-question="${question.id}"><div class="question-top"><span class="q-number">${String(question.id).padStart(2, '0')} /</span><div><h2>${escapeHTML(question.q)}</h2>${question.duplicateOf ? `<span class="badge">Same answer as #${question.duplicateOf}</span>` : ''}</div><button type="button" class="audio-btn" data-speak="${question.id}" aria-label="Listen to answer ${question.id}" ${canSpeak ? '' : 'disabled'}>${icon('volume-2')}</button></div><div class="answer" ${mode === 'first' ? 'aria-label="First-letter memory prompt"' : ''}>${answerMarkup(question.a, mode)}</div><div class="question-bottom"><span class="cue"><span class="cue-label">Memory cue</span>${escapeHTML(question.cue)}</span><button type="button" class="subtle translation-toggle" aria-expanded="false" aria-controls="translation-${question.id}">${icon('languages')} Show Portuguese</button></div><p lang="pt-BR" class="translation" id="translation-${question.id}" hidden>${escapeHTML(question.pt)}</p></article>`).join('');
 }
 
 function renderFlashcard() {
@@ -183,7 +230,7 @@ function setupDictation() {
     try { recognition.start(); }
     catch { $('#dictation-status').textContent = 'Microphone could not start. Try again or type your answer.'; }
   });
-  recognition.onstart = () => { listening = true; button.textContent = '■ Stop listening'; $('#dictation-status').textContent = 'Listening…'; };
+  recognition.onstart = () => { listening = true; button.innerHTML = `${icon('square')} Stop listening`; $('#dictation-status').textContent = 'Listening…'; };
   recognition.onresult = event => {
     const transcript = [...event.results].map(result => result[0].transcript).join(' ');
     const input = $('#practice-input');
@@ -194,7 +241,7 @@ function setupDictation() {
   recognition.onerror = event => {
     $('#dictation-status').textContent = event.error === 'not-allowed' ? 'Microphone permission is blocked. Allow it in browser settings or type instead.' : event.error === 'aborted' ? '' : 'No transcript received. Try again or type your answer. Speech recognition may need internet access.';
   };
-  recognition.onend = () => { listening = false; button.textContent = '🎤 Speak answer'; if ($('#dictation-status').textContent === 'Listening…') $('#dictation-status').textContent = 'No speech captured. Try again or type your answer.'; };
+  recognition.onend = () => { listening = false; button.innerHTML = `${icon('mic')} Speak answer`; if ($('#dictation-status').textContent === 'Listening…') $('#dictation-status').textContent = 'No speech captured. Try again or type your answer.'; };
 }
 
 function clearExamTimer() { clearInterval(examTimer); examTimer = null; }
@@ -202,7 +249,7 @@ function clearExamTimer() { clearInterval(examTimer); examTimer = null; }
 function renderExamStart() {
   clearExamTimer();
   exam = null;
-  $('#exam-content').innerHTML = `<p class="eyebrow">Interview simulation · ${questions.length} questions</p><h2>Take a breath.<br>You know this person.</h2><p>Hear each question, answer out loud, then compare with the script. Give yourself an honest ✓ or ✗. This is self-assessed; your voice is not recorded.</p><label class="exam-options">Time per answer<select id="exam-duration"><option value="30">30 seconds</option><option value="45">45 seconds</option><option value="60">60 seconds</option></select></label><button type="button" class="primary" data-exam="start">Start the interview →</button>${canSpeak ? '' : '<p class="helper">This browser cannot speak questions. Read each question on screen instead.</p>'}`;
+  $('#exam-content').innerHTML = `<pre class="ascii-art" aria-hidden="true">┌─ interview mode ─┐\n└─ one at a time ──┘</pre><p class="eyebrow">Interview simulation · ${questions.length} questions</p><h2>Take a breath.<br>You know this person.</h2><p>Hear each question, answer out loud, then compare with the script. Mark what you remembered. This is self-assessed; your voice is not recorded.</p><label class="exam-options">${icon('timer')} Time per answer<select id="exam-duration"><option value="30">30 seconds</option><option value="45">45 seconds</option><option value="60">60 seconds</option></select></label><button type="button" class="primary" data-exam="start">${icon('play')} Start the interview</button>${canSpeak ? '' : '<p class="helper">This browser cannot speak questions. Read each question on screen instead.</p>'}`;
 }
 
 function renderExamQuestion() {
@@ -210,7 +257,7 @@ function renderExamQuestion() {
   const question = questionById(exam.order[exam.index]);
   exam.revealed = false;
   exam.remaining = exam.duration;
-  $('#exam-content').innerHTML = `<p class="eyebrow">Interview ${exam.index + 1} / ${exam.order.length} · Question ${question.id}</p><h2>${escapeHTML(question.q)}</h2><button class="subtle" type="button" data-exam="listen" ${canSpeak ? '' : 'disabled'}>🔊 Hear the question again</button><div class="exam-timer" role="timer" aria-label="Seconds remaining"><span id="exam-seconds">${exam.remaining}</span><small>seconds</small></div><p class="helper">Answer out loud. Reveal when you’re ready.</p><div class="button-row"><button type="button" class="primary" data-exam="reveal">Reveal answer</button><button type="button" class="subtle" data-exam="end">End interview</button></div>`;
+  $('#exam-content').innerHTML = `<p class="eyebrow">Interview ${exam.index + 1} / ${exam.order.length} · Question ${question.id}</p><h2>${escapeHTML(question.q)}</h2><button class="subtle" type="button" data-exam="listen" ${canSpeak ? '' : 'disabled'}>${icon('volume-2')} Hear the question again</button><div class="exam-timer" role="timer" aria-label="Seconds remaining">${icon('timer')}<span id="exam-seconds">${exam.remaining}</span><small>seconds</small></div><p class="helper">Answer out loud. Reveal when you’re ready.</p><div class="button-row"><button type="button" class="primary" data-exam="reveal">${icon('book-open')} Reveal answer</button><button type="button" class="subtle" data-exam="end">${icon('square')} End interview</button></div>`;
   speak(question.q);
   examTimer = setInterval(() => {
     if (!exam || exam.revealed) { clearExamTimer(); return; }
@@ -225,7 +272,7 @@ function revealExamAnswer() {
   if (!exam || exam.revealed) return;
   clearExamTimer(); stopSpeech(); exam.revealed = true;
   const question = questionById(exam.order[exam.index]);
-  $('#exam-content').innerHTML = `<p class="eyebrow">Interview ${exam.index + 1} / ${exam.order.length} · Compare your answer</p><h2>${escapeHTML(question.q)}</h2><div class="exam-answer">${escapeHTML(question.a)}<span class="cue">Memory cue · ${escapeHTML(question.cue)}</span></div><p>Did you remember the exact answer?</p><div class="button-row"><button type="button" class="secondary" data-exam="missed">✗ Needs work · Next</button><button type="button" class="primary" data-exam="correct">✓ Got it · Next</button></div><button type="button" class="subtle" data-exam="end">End interview</button>`;
+  $('#exam-content').innerHTML = `<p class="eyebrow">Interview ${exam.index + 1} / ${exam.order.length} · Compare your answer</p><h2>${escapeHTML(question.q)}</h2><div class="exam-answer">${escapeHTML(question.a)}<span class="cue">Memory cue · ${escapeHTML(question.cue)}</span></div><p>Did you remember the exact answer?</p><div class="button-row"><button type="button" class="secondary" data-exam="missed">${icon('x')} Needs work · Next</button><button type="button" class="primary" data-exam="correct">${icon('check')} Got it · Next</button></div><button type="button" class="subtle" data-exam="end">${icon('square')} End interview</button>`;
   announce('Answer revealed. Compare your answer and give yourself a score.');
 }
 
@@ -233,7 +280,7 @@ function renderExamSummary() {
   clearExamTimer(); stopSpeech();
   const results = [...exam.results];
   const correct = results.filter(result => result.correct).length;
-  $('#exam-content').innerHTML = `<p class="eyebrow">Interview complete</p><h2>${results.length ? 'That’s a wrap, Lucas.' : 'Ready when you are.'}</h2><div class="exam-score">${correct}<span class="helper"> / ${results.length}</span></div><p>${results.length} of ${questions.length} questions self-assessed. ${correct === results.length && results.length ? 'You remembered every answer you assessed.' : 'Use your missed answers as your next study list.'} Flashcard progress stays separate.</p><button type="button" class="primary" data-exam="restart">Try another interview →</button>${results.length ? `<details class="exam-review"><summary>Review your answers</summary><ol>${results.map(result => `<li>${result.correct ? '✓' : '✗'} Q${result.id} · ${escapeHTML(questionById(result.id).q)}</li>`).join('')}</ol></details>` : ''}`;
+  $('#exam-content').innerHTML = `<pre class="ascii-art" aria-hidden="true">  .-★-.\n  | ${String(correct).padStart(2, ' ')}  |\n  '---'\n   /_&#92;</pre><p class="eyebrow">Interview complete</p><h2>${results.length ? 'That’s a wrap, Lucas.' : 'Ready when you are.'}</h2><div class="exam-score">${correct}<span class="helper"> / ${results.length}</span></div><p>${results.length} of ${questions.length} questions self-assessed. ${correct === results.length && results.length ? 'You remembered every answer you assessed.' : 'Use your missed answers as your next study list.'} Flashcard progress stays separate.</p><button type="button" class="primary" data-exam="restart">${icon('rotate-ccw')} Try another interview</button>${results.length ? `<details class="exam-review"><summary>Review your answers</summary><ol>${results.map(result => `<li>${icon(result.correct ? 'check' : 'x')} Q${result.id} · ${escapeHTML(questionById(result.id).q)}</li>`).join('')}</ol></details>` : ''}`;
   exam = null;
 }
 
@@ -274,7 +321,7 @@ function bindEvents() {
       const translation = document.getElementById(button.getAttribute('aria-controls'));
       translation.hidden = !translation.hidden;
       button.setAttribute('aria-expanded', String(!translation.hidden));
-      button.textContent = translation.hidden ? 'Show Portuguese' : 'Hide Portuguese';
+      button.innerHTML = `${icon('languages')} ${translation.hidden ? 'Show Portuguese' : 'Hide Portuguese'}`;
     }
   });
   $('#flash-card').addEventListener('click', () => { flipped = !flipped; renderFlashcard(); });
@@ -352,4 +399,5 @@ async function initialize() {
   }
 }
 
+setupTheme();
 initialize();
