@@ -1,6 +1,6 @@
 # Lucas Costa — Interview Persona
 
-English class (Germinare Tech · Business 3 · Unit 3) job-interview simulation.
+Fintech job-interview simulation (English class project).
 Candidate: **Lucas Costa**, 24, Business Administration at FEA-USP, applying to **PicPay** as **Junior Customer Experience Analyst**.
 
 Live: https://persona.duds.dev

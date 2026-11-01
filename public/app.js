@@ -51,16 +51,18 @@ function setupTheme() {
   const button = $('#theme-toggle');
   const sync = () => {
     const dark = document.documentElement.dataset.theme === 'dark';
-    button.setAttribute('aria-pressed', String(dark));
-    button.setAttribute('aria-label', `Switch to ${dark ? 'light' : 'dark'} theme`);
-    $('meta[name="theme-color"]').content = dark ? '#0f1115' : '#f7f8fa';
+    button.setAttribute('aria-checked', String(dark));
+    $('meta[name="theme-color"]').content = dark ? '#0d0f13' : '#ffffff';
   };
-  sync();
-  button.addEventListener('click', () => {
-    const theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  const setTheme = theme => {
     document.documentElement.dataset.theme = theme;
     try { localStorage.setItem('lc-theme', theme); } catch { /* Theme remains available for this session. */ }
     sync();
+  };
+  sync();
+  button.addEventListener('click', () => setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'));
+  button.addEventListener('keydown', event => {
+    if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') { event.preventDefault(); setTheme(event.key === 'ArrowRight' ? 'dark' : 'light'); }
   });
 }
 
@@ -100,11 +102,14 @@ function loadKnown() {
 }
 
 function updateProgress(save = false) {
-  $('#header-known').textContent = `${known.size} / ${questions.length} memorized`;
-  $('#header-progress').max = questions.length;
-  $('#header-progress').value = known.size;
-  $('#flash-known').textContent = `${known.size}/${questions.length} known`;
-  $('#flash-celebration').hidden = known.size !== questions.length || !questions.length;
+  const total = questions.length;
+  $('#header-known').textContent = `${known.size} / ${total}`;
+  const bar = $('#header-progress');
+  bar.setAttribute('aria-valuemax', String(total));
+  bar.setAttribute('aria-valuenow', String(known.size));
+  bar.style.setProperty('--p', total ? (known.size / total * 100).toFixed(2) : 0);
+  $('#flash-known').textContent = `${known.size}/${total} known`;
+  $('#flash-celebration').hidden = known.size !== total || !total;
   if (save) {
     try { localStorage.setItem('lc-known', JSON.stringify([...known])); }
     catch { announce('Your browser could not save progress. Your current session is still available.'); }
@@ -113,7 +118,12 @@ function updateProgress(save = false) {
 
 function renderPersona(persona) {
   const facts = [['graduation-cap', 'Education', persona.education], ['briefcase', 'Previous job', persona.previousJob], ['trophy', 'Proudest achievement', persona.achievement], ['languages', 'Languages', persona.languages], ['heart', 'Outside of work', persona.hobbies], ['waves', 'If I were an animal', persona.animal]];
-  $('#persona').innerHTML = `<div class="hero"><div class="hero-copy"><p class="eyebrow">Meet your interview persona</p><h1 id="persona-heading">Lucas Costa.</h1><p class="hero-tagline">${escapeHTML(persona.tagline)}</p><div class="role-label">Applying for <strong>${escapeHTML(persona.position)}</strong> at <b class="company">${escapeHTML(persona.company)}</b></div><p class="persona-meta">${escapeHTML(persona.name)}, ${escapeHTML(persona.age)} · ${escapeHTML(persona.city)}</p></div><div class="portrait-panel"><span class="portrait-fallback" role="img" aria-label="Lucas Costa initials">LC</span><img id="portrait" src="./lucas.png" alt="Portrait of Lucas Costa" onerror="this.hidden=true"></div></div><div class="intro-line"><h2>The person behind the answers.</h2><a class="download" href="./Lucas_Costa_Interview_Answers.pdf" download>${icon('download')} Download answered PDF</a></div><div class="facts-grid">${facts.map(([symbol, label, value]) => `<article class="fact"><h3>${icon(symbol)}${escapeHTML(label)}</h3><p>${escapeHTML(value)}</p>${symbol === 'waves' ? '<pre class="ascii-art" aria-hidden="true">      __\n  ___/ o&#92;_\n &lt;___  __ /   ~ ~\n     &#92;/</pre>' : ''}</article>`).join('')}</div><div class="traits" aria-label="Personality traits">${persona.traits.map(trait => `<span class="chip">${escapeHTML(trait)}</span>`).join('')}</div><aside class="cheat-strip"><h2>Quick facts to remember</h2><div class="cheat-facts">${['Lucas Costa', '24 years old', 'FEA-USP', 'Itaú · 1.5 years', 'Excel dashboard · 20%', 'Dolphin', 'Soccer / running / cooking'].map(fact => `<span>${fact}</span>`).join('')}</div></aside>`;
+  const stats = [['Age', persona.age], ['School', 'FEA-USP'], ['Last job', 'Itaú · 1.5 y'], ['Win', '−20% response time'], ['Animal', persona.animal], ['Hobbies', 'Soccer · Running · Cooking']];
+  const dolphin = $('#ascii-dolphin').innerHTML;
+  $('#persona').innerHTML = `<div class="section-heading"><h1 id="persona-heading">Persona</h1><a class="secondary download" href="./Lucas_Costa_Interview_Answers.pdf" download>${icon('download')} Answers PDF</a></div>
+  <article class="profile card"><div class="profile-photo"><span class="portrait-fallback" role="img" aria-label="Lucas Costa initials">LC</span><img id="portrait" src="./lucas.png" alt="Portrait of Lucas Costa" onerror="this.hidden=true"></div><div class="profile-body"><h2 class="profile-name">${escapeHTML(persona.name)}</h2><p class="profile-role">${escapeHTML(persona.position)} · <b class="company">${escapeHTML(persona.company)}</b></p><p class="profile-meta">${escapeHTML(persona.age)} · ${escapeHTML(persona.city)}</p><blockquote class="profile-quote">“${escapeHTML(persona.tagline)}”</blockquote><ul class="traits" aria-label="Personality traits">${persona.traits.map(trait => `<li class="trait"><span class="trait-dot" aria-hidden="true">${icon('check')}</span>${escapeHTML(trait)}</li>`).join('')}</ul></div></article>
+  <h2 class="block-title">Quick facts</h2><dl class="stats">${stats.map(([label, value]) => `<div class="stat card"><dt>${escapeHTML(label)}</dt><dd>${escapeHTML(value)}</dd></div>`).join('')}</dl>
+  <h2 class="block-title">Background</h2><div class="facts-grid">${facts.map(([symbol, label, value]) => `<article class="fact card${symbol === 'waves' ? ' fact-animal' : ''}"><h3><span class="fact-icon">${icon(symbol)}</span>${escapeHTML(label)}</h3><p>${escapeHTML(value)}</p>${symbol === 'waves' ? dolphin : ''}</article>`).join('')}</div>`;
 }
 
 function firstLetters(text) {
@@ -138,18 +148,25 @@ function answerMarkup(answer, mode) {
 
 function renderMemorize() {
   const mode = $('#memory-mode').value;
-  $('#question-list').innerHTML = questions.map(question => `<article class="question-card" data-question="${question.id}"><div class="question-top"><span class="q-number">${String(question.id).padStart(2, '0')} /</span><div><h2>${escapeHTML(question.q)}</h2>${question.duplicateOf ? `<span class="badge">Same answer as #${question.duplicateOf}</span>` : ''}</div><button type="button" class="audio-btn" data-speak="${question.id}" aria-label="Listen to answer ${question.id}" ${canSpeak ? '' : 'disabled'}>${icon('volume-2')}</button></div><div class="answer" ${mode === 'first' ? 'aria-label="First-letter memory prompt"' : ''}>${answerMarkup(question.a, mode)}</div><div class="question-bottom"><span class="cue"><span class="cue-label">Memory cue</span>${escapeHTML(question.cue)}</span><button type="button" class="subtle translation-toggle" aria-expanded="false" aria-controls="translation-${question.id}">${icon('languages')} Show Portuguese</button></div><p lang="pt-BR" class="translation" id="translation-${question.id}" hidden>${escapeHTML(question.pt)}</p></article>`).join('');
+  $('#question-list').innerHTML = questions.map(question => `<article class="question-card card" data-question="${question.id}"><div class="question-top"><span class="q-number">${String(question.id).padStart(2, '0')}</span><div><h2>${escapeHTML(question.q)}</h2>${question.duplicateOf ? `<span class="badge">Same answer as #${question.duplicateOf}</span>` : ''}</div><button type="button" class="audio-btn" data-speak="${question.id}" aria-label="Listen to answer ${question.id}" ${canSpeak ? '' : 'disabled'}>${icon('volume-2')}</button></div><div class="answer" ${mode === 'first' ? 'aria-label="First-letter memory prompt"' : ''}>${answerMarkup(question.a, mode)}</div><div class="question-bottom"><span class="cue"><span class="cue-label">Cue</span>${escapeHTML(question.cue)}</span><button type="button" class="subtle translation-toggle" aria-expanded="false" aria-controls="translation-${question.id}">${icon('languages')} Show Portuguese</button></div><p lang="pt-BR" class="translation" id="translation-${question.id}" hidden>${escapeHTML(question.pt)}</p></article>`).join('');
 }
 
+let renderedFlashId = null;
 function renderFlashcard() {
   const question = questionById(flashOrder[flashIndex]);
   if (!question) return;
+  const card = $('#flash-card');
+  // A new card snaps back to its question side instead of spinning through the next answer.
+  const instant = renderedFlashId !== question.id;
+  renderedFlashId = question.id;
+  if (instant) card.classList.add('no-anim');
   $('#flash-position').textContent = `Card ${flashIndex + 1} / ${flashOrder.length} · Q${question.id}${known.has(question.id) ? ' · Known ✓' : ''}`;
-  $('#flash-side').textContent = flipped ? 'The answer' : 'The question';
-  $('#flash-text').textContent = flipped ? question.a : question.q;
-  $('#flash-cue').textContent = flipped ? `Memory cue · ${question.cue}` : '';
-  $('#flash-card').classList.toggle('flipped', flipped);
-  $('#flash-card').setAttribute('aria-label', `${flipped ? 'Answer' : 'Question'} ${question.id}. ${flipped ? question.a : question.q}. Tap to flip.`);
+  $('#flash-q').textContent = question.q;
+  $('#flash-a').textContent = question.a;
+  $('#flash-cue').textContent = `Memory cue · ${question.cue}`;
+  card.classList.toggle('flipped', flipped);
+  card.setAttribute('aria-label', `${flipped ? 'Answer' : 'Question'} ${question.id}. ${flipped ? question.a : question.q}. Tap to flip.`);
+  if (instant) { void card.offsetWidth; card.classList.remove('no-anim'); }
 }
 
 function moveFlashcard(direction) {
@@ -210,7 +227,7 @@ function checkAnswer() {
     }
   }
   const accuracy = Math.round(table[0][0] / Math.max(expected.length, actual.length, 1) * 100);
-  $('#practice-result').innerHTML = `<div class="result-top"><span class="accuracy">${accuracy}%</span><div><h2>${accuracy === 100 ? 'Word-perfect. Keep going!' : 'Here’s what to practice.'}</h2><span class="helper">${table[0][0]} matching words · case and punctuation ignored</span></div></div><div class="diff">${pieces.join(' ')}</div><div class="diff-legend"><span class="diff-correct">Correct</span><span class="diff-missing">Missing</span><span class="diff-extra">Extra</span></div><p class="cue">Memory cue · ${escapeHTML(question.cue)}</p>`;
+  $('#practice-result').innerHTML = `<div class="result-top"><span class="accuracy">${accuracy}%</span><div><h2>${accuracy === 100 ? 'Word-perfect' : 'Accuracy'}</h2><span class="helper">${table[0][0]} matching words · case and punctuation ignored</span></div></div><div class="diff">${pieces.join(' ')}</div><div class="diff-legend"><span class="diff-correct">Correct</span><span class="diff-missing">Missing</span><span class="diff-extra">Extra</span></div><p class="cue">Memory cue · ${escapeHTML(question.cue)}</p>`;
   $('#practice-result').hidden = false;
   announce(`Your answer is ${accuracy} percent accurate.`);
 }
@@ -249,7 +266,7 @@ function clearExamTimer() { clearInterval(examTimer); examTimer = null; }
 function renderExamStart() {
   clearExamTimer();
   exam = null;
-  $('#exam-content').innerHTML = `<pre class="ascii-art" aria-hidden="true">┌─ interview mode ─┐\n└─ one at a time ──┘</pre><p class="eyebrow">Interview simulation · ${questions.length} questions</p><h2>Take a breath.<br>You know this person.</h2><p>Hear each question, answer out loud, then compare with the script. Mark what you remembered. This is self-assessed; your voice is not recorded.</p><label class="exam-options">${icon('timer')} Time per answer<select id="exam-duration"><option value="30">30 seconds</option><option value="45">45 seconds</option><option value="60">60 seconds</option></select></label><button type="button" class="primary" data-exam="start">${icon('play')} Start the interview</button>${canSpeak ? '' : '<p class="helper">This browser cannot speak questions. Read each question on screen instead.</p>'}`;
+  $('#exam-content').innerHTML = `<pre class="ascii-art" aria-hidden="true"> .-----------------.\n |  Tell me about  |\n |    yourself.    |\n '--. .------------'\n    |/</pre><p class="eyebrow">${questions.length} questions · shuffled</p><h2>Mock interview</h2><p>Hear each question, answer out loud, then reveal and grade yourself.</p><label class="exam-options">${icon('timer')} Time per answer<select id="exam-duration"><option value="30">30 seconds</option><option value="45">45 seconds</option><option value="60">60 seconds</option></select></label><button type="button" class="primary" data-exam="start">${icon('play')} Start interview</button>${canSpeak ? '' : '<p class="helper">This browser cannot speak questions. Read each question on screen instead.</p>'}`;
 }
 
 function renderExamQuestion() {
@@ -257,7 +274,7 @@ function renderExamQuestion() {
   const question = questionById(exam.order[exam.index]);
   exam.revealed = false;
   exam.remaining = exam.duration;
-  $('#exam-content').innerHTML = `<p class="eyebrow">Interview ${exam.index + 1} / ${exam.order.length} · Question ${question.id}</p><h2>${escapeHTML(question.q)}</h2><button class="subtle" type="button" data-exam="listen" ${canSpeak ? '' : 'disabled'}>${icon('volume-2')} Hear the question again</button><div class="exam-timer" role="timer" aria-label="Seconds remaining">${icon('timer')}<span id="exam-seconds">${exam.remaining}</span><small>seconds</small></div><p class="helper">Answer out loud. Reveal when you’re ready.</p><div class="button-row"><button type="button" class="primary" data-exam="reveal">${icon('book-open')} Reveal answer</button><button type="button" class="subtle" data-exam="end">${icon('square')} End interview</button></div>`;
+  $('#exam-content').innerHTML = `<p class="eyebrow">Question ${exam.index + 1} / ${exam.order.length} · Q${question.id}</p><h2>${escapeHTML(question.q)}</h2><button class="subtle" type="button" data-exam="listen" ${canSpeak ? '' : 'disabled'}>${icon('volume-2')} Hear again</button><div class="exam-timer" role="timer" aria-label="Seconds remaining">${icon('timer')}<span id="exam-seconds">${exam.remaining}</span><small>sec</small></div><div class="button-row"><button type="button" class="primary" data-exam="reveal">${icon('book-open')} Reveal answer</button><button type="button" class="subtle" data-exam="end">${icon('square')} End interview</button></div>`;
   speak(question.q);
   examTimer = setInterval(() => {
     if (!exam || exam.revealed) { clearExamTimer(); return; }
@@ -272,7 +289,7 @@ function revealExamAnswer() {
   if (!exam || exam.revealed) return;
   clearExamTimer(); stopSpeech(); exam.revealed = true;
   const question = questionById(exam.order[exam.index]);
-  $('#exam-content').innerHTML = `<p class="eyebrow">Interview ${exam.index + 1} / ${exam.order.length} · Compare your answer</p><h2>${escapeHTML(question.q)}</h2><div class="exam-answer">${escapeHTML(question.a)}<span class="cue">Memory cue · ${escapeHTML(question.cue)}</span></div><p>Did you remember the exact answer?</p><div class="button-row"><button type="button" class="secondary" data-exam="missed">${icon('x')} Needs work · Next</button><button type="button" class="primary" data-exam="correct">${icon('check')} Got it · Next</button></div><button type="button" class="subtle" data-exam="end">${icon('square')} End interview</button>`;
+  $('#exam-content').innerHTML = `<p class="eyebrow">Question ${exam.index + 1} / ${exam.order.length} · Q${question.id}</p><h2>${escapeHTML(question.q)}</h2><div class="exam-answer">${escapeHTML(question.a)}<span class="cue">Memory cue · ${escapeHTML(question.cue)}</span></div><p>Did you remember it word for word?</p><div class="button-row"><button type="button" class="secondary" data-exam="missed">${icon('x')} Needs work</button><button type="button" class="primary" data-exam="correct">${icon('check')} Got it</button></div><button type="button" class="subtle" data-exam="end">${icon('square')} End interview</button>`;
   announce('Answer revealed. Compare your answer and give yourself a score.');
 }
 
@@ -280,7 +297,7 @@ function renderExamSummary() {
   clearExamTimer(); stopSpeech();
   const results = [...exam.results];
   const correct = results.filter(result => result.correct).length;
-  $('#exam-content').innerHTML = `<pre class="ascii-art" aria-hidden="true">  .-★-.\n  | ${String(correct).padStart(2, ' ')}  |\n  '---'\n   /_&#92;</pre><p class="eyebrow">Interview complete</p><h2>${results.length ? 'That’s a wrap, Lucas.' : 'Ready when you are.'}</h2><div class="exam-score">${correct}<span class="helper"> / ${results.length}</span></div><p>${results.length} of ${questions.length} questions self-assessed. ${correct === results.length && results.length ? 'You remembered every answer you assessed.' : 'Use your missed answers as your next study list.'} Flashcard progress stays separate.</p><button type="button" class="primary" data-exam="restart">${icon('rotate-ccw')} Try another interview</button>${results.length ? `<details class="exam-review"><summary>Review your answers</summary><ol>${results.map(result => `<li>${icon(result.correct ? 'check' : 'x')} Q${result.id} · ${escapeHTML(questionById(result.id).q)}</li>`).join('')}</ol></details>` : ''}`;
+  $('#exam-content').innerHTML = `<pre class="ascii-art" aria-hidden="true"> .-=-=-=-.\n \\       /\n  '.   .'\n    ) (\n  .'___'.</pre><h2>${results.length ? 'Interview complete' : 'No answers graded'}</h2><div class="exam-score">${correct}<span class="helper"> / ${results.length}</span></div><p>${results.length} of ${questions.length} questions answered</p><button type="button" class="primary" data-exam="restart">${icon('rotate-ccw')} New interview</button>${results.length ? `<details class="exam-review"><summary>Review your answers</summary><ol>${results.map(result => `<li>${icon(result.correct ? 'check' : 'x')} Q${result.id} · ${escapeHTML(questionById(result.id).q)}</li>`).join('')}</ol></details>` : ''}`;
   exam = null;
 }
 
@@ -291,6 +308,7 @@ function navigate() {
     stopSpeech();
     if (recognition && listening) recognition.abort();
     if (activeView === 'exam') renderExamStart();
+    window.scrollTo(0, 0);
   }
   activeView = nextView;
   for (const view of views) $(`#${view}`).hidden = view !== activeView;
@@ -298,6 +316,10 @@ function navigate() {
     if (link.dataset.tab === activeView) link.setAttribute('aria-current', 'page');
     else link.removeAttribute('aria-current');
   });
+  const nav = $('.nav');
+  nav.style.setProperty('--i', views.indexOf(activeView));
+  // Enable the indicator slide only after its first placement, so the page never animates in from tab 0.
+  if (!nav.classList.contains('nav-ready')) requestAnimationFrame(() => requestAnimationFrame(() => nav.classList.add('nav-ready')));
   document.title = `${activeView === 'exam' ? 'Interview' : activeView[0].toUpperCase() + activeView.slice(1)} · Lucas Costa`;
 }
 
