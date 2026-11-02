@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#ffffff">
   <meta name="description" content="Lucas Costa's persona and 22 interview answers for the PicPay Junior CX Analyst role.">
   <title>Lucas Costa · PicPay interview</title>
-  <script>try { document.documentElement.dataset.theme = localStorage.getItem('lc-theme') === 'dark' ? 'dark' : 'light'; } catch { document.documentElement.dataset.theme = 'light'; }</script>
+  <script>try { document.documentElement.dataset.theme = localStorage.getItem('lc-theme') === 'dark' ? 'dark' : 'light'; document.documentElement.dataset.sidebar = localStorage.getItem('lc-sidebar') === 'collapsed' ? 'collapsed' : 'expanded'; } catch { document.documentElement.dataset.theme = 'light'; }</script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -27,6 +27,7 @@
       <a href="#flashcards" data-tab="flashcards" aria-label="Flashcards"><span data-icon="layers"></span><span class="nav-label nav-long">Flashcards</span><span class="nav-label nav-short">Cards</span></a>
       <a href="#practice" data-tab="practice"><span data-icon="pencil"></span><span class="nav-label">Practice</span></a>
       <a href="#exam" data-tab="exam"><span data-icon="mic"></span><span class="nav-label">Interview</span></a>
+      <a href="#work" data-tab="work" aria-label="About the work"><span data-icon="info"></span><span class="nav-label nav-long">About the work</span><span class="nav-label nav-short">About</span></a>
     </nav>
     <div class="sidebar-foot">
       <div class="progress-block">
@@ -37,51 +38,77 @@
         <span class="theme-label" id="theme-label">Dark mode</span>
         <button id="theme-toggle" class="theme-switch" type="button" role="switch" aria-checked="false" aria-labelledby="theme-label"><span class="theme-thumb" aria-hidden="true"></span><span class="theme-icon" data-icon="sun" aria-hidden="true"></span><span class="theme-icon" data-icon="moon" aria-hidden="true"></span></button>
       </div>
+      <button id="sidebar-toggle" class="collapse-btn" type="button" aria-expanded="true" aria-label="Collapse sidebar" title="Collapse sidebar"><span class="collapse-icon" data-icon="panel-left-close"></span><span class="collapse-label">Collapse</span></button>
     </div>
   </header>
   <main id="main" tabindex="-1">
     <p id="loading" class="notice" role="status">Loading…</p>
     <section id="persona" class="view" aria-labelledby="persona-heading" hidden></section>
     <section id="memorize" class="view" aria-labelledby="memorize-heading" hidden>
-      <div class="section-heading"><h1 id="memorize-heading">Memorize</h1><span class="section-count">22 questions</span></div>
+      <header class="page-head"><h1 id="memorize-heading">Memorize</h1><span class="pill">22 questions</span></header>
       <div class="toolbar card">
-        <label>Memory mode<select id="memory-mode"><option value="full">Full text</option><option value="first">First letters</option><option value="cloze">Cloze</option><option value="hidden">Hidden</option></select></label>
-        <label class="rate-control">Voice speed <output id="rate-value" for="speech-rate">0.9×</output><input id="speech-rate" type="range" min="0.7" max="1.1" step="0.1" value="0.9"></label>
-        <button id="stop-speech" class="secondary" type="button"><span data-icon="square"></span>Stop audio</button>
+        <label class="field">Memory mode<select id="memory-mode"><option value="full">Full text</option><option value="first">First letters</option><option value="cloze">Cloze</option><option value="hidden">Hidden</option></select></label>
+        <label class="field rate-control"><span class="field-row">Voice speed<output id="rate-value" for="speech-rate">0.9×</output></span><input id="speech-rate" type="range" min="0.7" max="1.1" step="0.1" value="0.9"></label>
+        <p id="speech-note" class="helper toolbar-note">Tap the speaker to listen, tap again to stop.</p>
       </div>
-      <p id="speech-note" class="helper">Listen, then repeat out loud.</p>
       <div id="question-list" class="question-list"></div>
     </section>
     <section id="flashcards" class="view study-view" aria-labelledby="flashcards-heading" hidden>
-      <div class="section-heading"><h1 id="flashcards-heading">Flashcards</h1><span id="flash-known" class="section-count">0/22 known</span></div>
-      <div class="flash-top"><span id="flash-position" class="eyebrow"></span><div class="button-row"><button id="shuffle" class="subtle" type="button"><span data-icon="shuffle"></span>Shuffle</button><button id="reset-known" class="subtle" type="button"><span data-icon="rotate-ccw"></span>Reset</button></div></div>
-      <button id="flash-card" class="flash-card" type="button" aria-label="Flip flashcard">
-        <span class="flash-inner">
-          <span class="flash-face flash-front"><span class="eyebrow">Question</span><span id="flash-q" class="flash-text"></span><span class="flash-hint">Tap to flip</span></span>
-          <span class="flash-face flash-back"><span class="eyebrow">Answer</span><span id="flash-a" class="flash-text"></span><span id="flash-cue" class="cue"></span></span>
-        </span>
-      </button>
-      <pre id="flash-celebration" class="ascii-art center" aria-hidden="true" hidden>*  .  ★  .  *
-  22 / 22</pre>
-      <div class="flash-actions"><button id="flash-prev" class="subtle" type="button" aria-label="Previous flashcard"><span data-icon="chevron-left"></span>Prev</button><div class="button-row"><button id="again" class="secondary" type="button"><span data-icon="rotate-ccw"></span>Again</button><button id="got-it" class="primary" type="button"><span data-icon="check"></span>Got it</button></div><button id="flash-next" class="subtle" type="button" aria-label="Next flashcard">Next<span data-icon="chevron-right"></span></button></div>
-      <p class="helper center"><span class="hint-desktop">← → to move · Space to flip</span><span class="hint-touch">Swipe to move</span></p>
+      <header class="page-head"><h1 id="flashcards-heading">Flashcards</h1><span id="flash-known" class="pill">0/22 known</span></header>
+      <div class="stage stage-narrow">
+        <div class="flash-top"><span id="flash-position" class="eyebrow"></span><div class="button-row"><button id="shuffle" class="subtle" type="button"><span data-icon="shuffle"></span>Shuffle</button><button id="reset-known" class="subtle" type="button"><span data-icon="rotate-ccw"></span>Reset</button></div></div>
+        <button id="flash-card" class="flash-card" type="button" aria-label="Flip flashcard">
+          <span class="flash-inner">
+            <span class="flash-face flash-front"><span class="eyebrow">Question</span><span id="flash-q" class="flash-text"></span><span class="flash-hint">Tap to flip</span></span>
+            <span class="flash-face flash-back"><span class="eyebrow">Answer</span><span id="flash-a" class="flash-text"></span><span id="flash-cue" class="cue"></span></span>
+          </span>
+        </button>
+        <p id="flash-celebration" class="celebration" hidden>★ 22 / 22 memorized ★</p>
+        <div class="flash-actions"><button id="flash-prev" class="subtle" type="button" aria-label="Previous flashcard"><span data-icon="chevron-left"></span>Prev</button><div class="button-row"><button id="again" class="secondary" type="button"><span data-icon="rotate-ccw"></span>Again</button><button id="got-it" class="primary" type="button"><span data-icon="check"></span>Got it</button></div><button id="flash-next" class="subtle" type="button" aria-label="Next flashcard">Next<span data-icon="chevron-right"></span></button></div>
+        <p class="helper center flash-hints"><span class="hint-desktop">← → to move · Space to flip</span><span class="hint-touch">Swipe to move</span></p>
+      </div>
     </section>
     <section id="practice" class="view study-view" aria-labelledby="practice-heading" hidden>
-      <div class="section-heading"><h1 id="practice-heading">Practice</h1></div>
-      <div class="practice-panel panel"><div class="question-picker"><label for="practice-select">Question</label><div class="picker-row"><select id="practice-select"></select><button id="practice-random" class="secondary" type="button"><span data-icon="shuffle"></span>Random</button></div></div><h2 id="practice-question"></h2><label for="practice-input">Your answer</label><textarea id="practice-input" rows="7" placeholder="Type it from memory…" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea><div class="button-row"><button id="check-answer" class="primary" type="button"><span data-icon="check"></span>Check answer</button><button id="dictate" class="secondary" type="button" hidden><span data-icon="mic"></span>Speak answer</button><span id="dictation-status" class="helper" role="status"></span></div></div>
-      <div id="practice-result" class="panel result-panel" aria-live="polite" hidden></div>
+      <header class="page-head"><h1 id="practice-heading">Practice</h1></header>
+      <div class="stage">
+        <div class="practice-panel panel"><div class="question-picker"><label for="practice-select">Question</label><div class="picker-row"><select id="practice-select"></select><button id="practice-random" class="secondary" type="button"><span data-icon="shuffle"></span>Random</button></div></div><h2 id="practice-question"></h2><label for="practice-input">Your answer</label><textarea id="practice-input" rows="7" placeholder="Type it from memory…" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea><div class="button-row"><button id="check-answer" class="primary" type="button"><span data-icon="check"></span>Check answer</button><button id="dictate" class="secondary" type="button" hidden><span data-icon="mic"></span>Speak answer</button><span id="dictation-status" class="helper" role="status"></span></div></div>
+        <div id="practice-result" class="panel result-panel" aria-live="polite" hidden></div>
+      </div>
     </section>
     <section id="exam" class="view study-view" aria-labelledby="exam-heading" hidden>
-      <div class="section-heading"><h1 id="exam-heading">Interview</h1></div>
-      <div id="exam-content" class="panel exam-panel"></div>
+      <header class="page-head"><h1 id="exam-heading">Interview</h1></header>
+      <div class="stage">
+        <div id="exam-content" class="panel exam-panel"></div>
+      </div>
+    </section>
+    <section id="work" class="view" aria-labelledby="work-heading" hidden>
+      <header class="page-head"><h1 id="work-heading">About the work</h1></header>
+      <article class="about card">
+        <div class="about-intro">
+          <span class="hero-icon" data-icon="graduation-cap" aria-hidden="true"></span>
+          <div>
+            <h2>English class project</h2>
+            <p>We created this persona for Professor Leda's English class — 3º Fintech.</p>
+          </div>
+        </div>
+        <div class="about-section">
+          <h3 class="block-title">Group</h3>
+          <ul class="members">
+            <li class="member"><span class="member-avatar" aria-hidden="true">EP</span>Eduardo de Paula</li>
+            <li class="member"><span class="member-avatar" aria-hidden="true">KG</span>Kenzo Gushi</li>
+            <li class="member"><span class="member-avatar" aria-hidden="true">GF</span>Gustavo Fujita</li>
+            <li class="member"><span class="member-avatar" aria-hidden="true">FS</span>Felipe Soares</li>
+          </ul>
+        </div>
+        <div class="about-section">
+          <h3 class="block-title">What's here</h3>
+          <p>Lucas Costa's persona and his answers to 22 interview questions.</p>
+          <p>Tools to memorize them: memory modes with audio, flashcards, typing practice and a timed mock interview.</p>
+          <a class="secondary" href="./Lucas_Costa_Interview_Answers.pdf" download><span data-icon="download"></span>Answered PDF</a>
+        </div>
+      </article>
     </section>
     <p id="app-status" class="sr-only" role="status" aria-live="polite"></p>
   </main>
-  <template id="ascii-dolphin"><pre class="ascii-art dolphin" aria-hidden="true">              ,
-            __)\_
-      (\_.-'    o`-.
-  .   (/~~````(/~^^`  .
-    '   .    '    .  '
-~^~^~^~^~^~^~^~^~^~^~^~^~^~</pre></template>
 </body>
 </html>

@@ -1,7 +1,8 @@
 'use strict';
 
 const $ = (selector, root = document) => root.querySelector(selector);
-const views = ['persona', 'memorize', 'flashcards', 'practice', 'exam'];
+const views = ['persona', 'memorize', 'flashcards', 'practice', 'exam', 'work'];
+const viewTitles = { persona: 'Persona', memorize: 'Memorize', flashcards: 'Flashcards', practice: 'Practice', exam: 'Interview', work: 'About the work' };
 let questions = [];
 let known = new Set();
 let activeView = 'persona';
@@ -19,7 +20,17 @@ const announce = message => { $('#app-status').textContent = message; };
 const questionById = id => questions.find(question => question.id === Number(id));
 
 const icons = {
-  user: '<path d="M20 21v-2a7 7 0 0 0-14 0v2"/><circle cx="13" cy="7" r="4"/>',
+  user: '<path d="M19 21v-2a7 7 0 0 0-14 0v2"/><circle cx="12" cy="7" r="4"/>',
+  users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+  info: '<circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/>',
+  cake: '<path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8M4 16c1 .7 2 1 3 1 2 0 3-2 5-2s3 2 5 2c1 0 2-.3 3-1M2 21h20M7 8v3M12 8v3M17 8v3M7 4h.01M12 4h.01M17 4h.01"/>',
+  'trending-down': '<path d="m22 17-8.5-8.5-5 5L2 7M16 17h6v-6"/>',
+  'list-checks': '<path d="m3 17 2 2 4-4M3 7l2 2 4-4M13 6h8M13 12h8M13 18h8"/>',
+  leaf: '<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.5 19 2c1 2 2 4.2 2 8 0 5.5-4.8 10-10 10Z"/><path d="M2 21c0-3 1.9-5.4 5.1-6 2.4-.5 4.9-2 5.9-3"/>',
+  'message-circle': '<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>',
+  'panel-left-close': '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M16 15l-3-3 3-3"/>',
+  'panel-left-open': '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M14 9l3 3-3 3"/>',
+  stop: '<rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor" stroke="none"/>',
   'book-open': '<path d="M12 5v16M3 3h4a5 5 0 0 1 5 2 5 5 0 0 1 5-2h4v16h-4a7 7 0 0 0-5 2 7 7 0 0 0-5-2H3z"/>',
   layers: '<path d="m12 3 10 5-10 5L2 8zM2 12l10 5 10-5M2 16l10 5 10-5"/>',
   pencil: '<path d="m16 3 5 5-12 12-6 1 1-6zM14 5l5 5"/>',
@@ -66,6 +77,32 @@ function setupTheme() {
   });
 }
 
+function setupSidebar() {
+  const root = document.documentElement;
+  const button = $('#sidebar-toggle');
+  const tips = [[$('.brand'), 'Lucas Costa'], [$('.progress-block'), 'Memorized'], [$('#theme-toggle'), 'Dark mode']];
+  const sync = () => {
+    const collapsed = root.dataset.sidebar === 'collapsed';
+    const label = collapsed ? 'Expand sidebar' : 'Collapse sidebar';
+    button.setAttribute('aria-expanded', String(!collapsed));
+    button.setAttribute('aria-label', label);
+    button.title = label;
+    $('.collapse-icon', button).innerHTML = icon(collapsed ? 'panel-left-open' : 'panel-left-close');
+    // Icon-only rail: hovering an item shows its name.
+    document.querySelectorAll('.nav a').forEach(link => {
+      if (collapsed) link.title = link.getAttribute('aria-label') || link.textContent.trim();
+      else link.removeAttribute('title');
+    });
+    tips.forEach(([element, tip]) => { if (collapsed) element.title = tip; else element.removeAttribute('title'); });
+  };
+  button.addEventListener('click', () => {
+    root.dataset.sidebar = root.dataset.sidebar === 'collapsed' ? 'expanded' : 'collapsed';
+    try { localStorage.setItem('lc-sidebar', root.dataset.sidebar); } catch { /* Layout choice remains for this session. */ }
+    sync();
+  });
+  sync();
+}
+
 function shuffled(items) {
   const result = [...items];
   for (let i = result.length - 1; i > 0; i--) {
@@ -75,11 +112,33 @@ function shuffled(items) {
   return result;
 }
 
-function stopSpeech() {
-  if (canSpeak) window.speechSynthesis.cancel();
+let speakingButton = null;
+let currentUtterance = null;
+
+// Swaps an answer's speaker button between play and stop states.
+function setSpeakingButton(button) {
+  if (speakingButton) {
+    speakingButton.classList.remove('speaking');
+    speakingButton.innerHTML = icon('volume-2');
+    speakingButton.setAttribute('aria-label', `Listen to answer ${speakingButton.dataset.speak}`);
+    speakingButton.setAttribute('aria-pressed', 'false');
+  }
+  speakingButton = button;
+  if (button) {
+    button.classList.add('speaking');
+    button.innerHTML = icon('stop');
+    button.setAttribute('aria-label', `Stop answer ${button.dataset.speak}`);
+    button.setAttribute('aria-pressed', 'true');
+  }
 }
 
-function speak(text) {
+function stopSpeech() {
+  currentUtterance = null;
+  if (canSpeak) window.speechSynthesis.cancel();
+  setSpeakingButton(null);
+}
+
+function speak(text, button = null) {
   if (!canSpeak) { announce('Text-to-speech is not supported in this browser.'); return; }
   stopSpeech();
   const utterance = new SpeechSynthesisUtterance(text);
@@ -88,10 +147,16 @@ function speak(text) {
   const voices = speechSynthesis.getVoices();
   const voice = voices.find(item => item.lang === 'en-US') || voices.find(item => item.lang.startsWith('en'));
   if (voice) utterance.voice = voice;
+  // Cancelled utterances report late; only the current one may reset the button.
+  const finish = () => { if (currentUtterance === utterance) { currentUtterance = null; setSpeakingButton(null); } };
+  utterance.onend = finish;
   utterance.onerror = event => {
+    finish();
     if (!['canceled', 'interrupted'].includes(event.error)) announce('Audio could not play. You can still read and practice the text.');
   };
+  currentUtterance = utterance;
   speechSynthesis.speak(utterance);
+  if (button) setSpeakingButton(button);
 }
 
 function loadKnown() {
@@ -117,13 +182,15 @@ function updateProgress(save = false) {
 }
 
 function renderPersona(persona) {
-  const facts = [['graduation-cap', 'Education', persona.education], ['briefcase', 'Previous job', persona.previousJob], ['trophy', 'Proudest achievement', persona.achievement], ['languages', 'Languages', persona.languages], ['heart', 'Outside of work', persona.hobbies], ['waves', 'If I were an animal', persona.animal]];
-  const stats = [['Age', persona.age], ['School', 'FEA-USP'], ['Last job', 'Itaú · 1.5 y'], ['Win', '−20% response time'], ['Animal', persona.animal], ['Hobbies', 'Soccer · Running · Cooking']];
-  const dolphin = $('#ascii-dolphin').innerHTML;
-  $('#persona').innerHTML = `<div class="section-heading"><h1 id="persona-heading">Persona</h1><a class="secondary download" href="./Lucas_Costa_Interview_Answers.pdf" download>${icon('download')} Answers PDF</a></div>
-  <article class="profile card"><div class="profile-photo"><span class="portrait-fallback" role="img" aria-label="Lucas Costa initials">LC</span><img id="portrait" src="./lucas.png" alt="Portrait of Lucas Costa" onerror="this.hidden=true"></div><div class="profile-body"><h2 class="profile-name">${escapeHTML(persona.name)}</h2><p class="profile-role">${escapeHTML(persona.position)} · <b class="company">${escapeHTML(persona.company)}</b></p><p class="profile-meta">${escapeHTML(persona.age)} · ${escapeHTML(persona.city)}</p><blockquote class="profile-quote">“${escapeHTML(persona.tagline)}”</blockquote><ul class="traits" aria-label="Personality traits">${persona.traits.map(trait => `<li class="trait"><span class="trait-dot" aria-hidden="true">${icon('check')}</span>${escapeHTML(trait)}</li>`).join('')}</ul></div></article>
-  <h2 class="block-title">Quick facts</h2><dl class="stats">${stats.map(([label, value]) => `<div class="stat card"><dt>${escapeHTML(label)}</dt><dd>${escapeHTML(value)}</dd></div>`).join('')}</dl>
-  <h2 class="block-title">Background</h2><div class="facts-grid">${facts.map(([symbol, label, value]) => `<article class="fact card${symbol === 'waves' ? ' fact-animal' : ''}"><h3><span class="fact-icon">${icon(symbol)}</span>${escapeHTML(label)}</h3><p>${escapeHTML(value)}</p>${symbol === 'waves' ? dolphin : ''}</article>`).join('')}</div>`;
+  const animal = `${persona.animal}${persona.animal === 'Dolphin' ? ' 🐬' : ''}`;
+  const facts = [['graduation-cap', 'Education', persona.education], ['briefcase', 'Previous job', persona.previousJob], ['trophy', 'Proudest achievement', persona.achievement], ['languages', 'Languages', persona.languages], ['heart', 'Outside of work', persona.hobbies], ['waves', 'If I were an animal', animal]];
+  const stats = [['cake', 'Age', persona.age], ['graduation-cap', 'School', 'FEA-USP'], ['briefcase', 'Last job', 'Itaú · 1.5 y'], ['trending-down', 'Win', '−20% response time'], ['waves', 'Animal', animal], ['heart', 'Hobbies', 'Soccer · Running · Cooking']];
+  const traitIcons = { organized: 'list-checks', 'calm under pressure': 'leaf', 'good communicator': 'message-circle', 'team player': 'users' };
+  const entry = ([symbol, label, value]) => `<dt><span class="chip" aria-hidden="true">${icon(symbol)}</span>${escapeHTML(label)}</dt><dd>${escapeHTML(value)}</dd>`;
+  $('#persona').innerHTML = `<header class="page-head"><h1 id="persona-heading">Persona</h1><a class="secondary" href="./Lucas_Costa_Interview_Answers.pdf" download>${icon('download')}Answers PDF</a></header>
+  <article class="profile card"><div class="profile-main"><div class="profile-photo"><span class="portrait-fallback" role="img" aria-label="Lucas Costa initials">LC</span><img id="portrait" src="./lucas.png" alt="Portrait of Lucas Costa" onerror="this.hidden=true"></div><div class="profile-body"><h2 class="profile-name">${escapeHTML(persona.name)}</h2><p class="profile-role">${escapeHTML(persona.position)} · <b class="company">${escapeHTML(persona.company)}</b></p><p class="profile-meta">${escapeHTML(persona.age)} · ${escapeHTML(persona.city)}</p><blockquote class="profile-quote">“${escapeHTML(persona.tagline)}”</blockquote></div></div><ul class="traits" aria-label="Personality traits">${persona.traits.map(trait => `<li class="trait"><span class="trait-icon" aria-hidden="true">${icon(traitIcons[trait.trim().toLowerCase()] || 'check')}</span>${escapeHTML(trait)}</li>`).join('')}</ul></article>
+  <section class="block" aria-labelledby="facts-title"><h2 class="block-title" id="facts-title">Quick facts</h2><dl class="stats">${stats.map(item => `<div class="stat card">${entry(item)}</div>`).join('')}</dl></section>
+  <section class="block" aria-labelledby="background-title"><h2 class="block-title" id="background-title">Background</h2><dl class="facts card">${facts.map(item => `<div class="fact">${entry(item)}</div>`).join('')}</dl></section>`;
 }
 
 function firstLetters(text) {
@@ -147,6 +214,7 @@ function answerMarkup(answer, mode) {
 }
 
 function renderMemorize() {
+  stopSpeech();
   const mode = $('#memory-mode').value;
   $('#question-list').innerHTML = questions.map(question => `<article class="question-card card" data-question="${question.id}"><div class="question-top"><span class="q-number">${String(question.id).padStart(2, '0')}</span><div><h2>${escapeHTML(question.q)}</h2>${question.duplicateOf ? `<span class="badge">Same answer as #${question.duplicateOf}</span>` : ''}</div><button type="button" class="audio-btn" data-speak="${question.id}" aria-label="Listen to answer ${question.id}" ${canSpeak ? '' : 'disabled'}>${icon('volume-2')}</button></div><div class="answer" ${mode === 'first' ? 'aria-label="First-letter memory prompt"' : ''}>${answerMarkup(question.a, mode)}</div><div class="question-bottom"><span class="cue"><span class="cue-label">Cue</span>${escapeHTML(question.cue)}</span><button type="button" class="subtle translation-toggle" aria-expanded="false" aria-controls="translation-${question.id}">${icon('languages')} Show Portuguese</button></div><p lang="pt-BR" class="translation" id="translation-${question.id}" hidden>${escapeHTML(question.pt)}</p></article>`).join('');
 }
@@ -160,7 +228,7 @@ function renderFlashcard() {
   const instant = renderedFlashId !== question.id;
   renderedFlashId = question.id;
   if (instant) card.classList.add('no-anim');
-  $('#flash-position').textContent = `Card ${flashIndex + 1} / ${flashOrder.length} · Q${question.id}${known.has(question.id) ? ' · Known ✓' : ''}`;
+  $('#flash-position').textContent = `Card ${flashIndex + 1} / ${flashOrder.length} · Q${question.id}${known.has(question.id) ? ' · Known\u00a0✓' : ''}`;
   $('#flash-q').textContent = question.q;
   $('#flash-a').textContent = question.a;
   $('#flash-cue').textContent = `Memory cue · ${question.cue}`;
@@ -266,7 +334,7 @@ function clearExamTimer() { clearInterval(examTimer); examTimer = null; }
 function renderExamStart() {
   clearExamTimer();
   exam = null;
-  $('#exam-content').innerHTML = `<pre class="ascii-art" aria-hidden="true"> .-----------------.\n |  Tell me about  |\n |    yourself.    |\n '--. .------------'\n    |/</pre><p class="eyebrow">${questions.length} questions · shuffled</p><h2>Mock interview</h2><p>Hear each question, answer out loud, then reveal and grade yourself.</p><label class="exam-options">${icon('timer')} Time per answer<select id="exam-duration"><option value="30">30 seconds</option><option value="45">45 seconds</option><option value="60">60 seconds</option></select></label><button type="button" class="primary" data-exam="start">${icon('play')} Start interview</button>${canSpeak ? '' : '<p class="helper">This browser cannot speak questions. Read each question on screen instead.</p>'}`;
+  $('#exam-content').innerHTML = `<span class="hero-icon" aria-hidden="true">${icon('mic')}</span><p class="eyebrow">${questions.length} questions · shuffled</p><h2>Mock interview</h2><p>Hear each question, answer out loud, then reveal and grade yourself.</p><label class="exam-options">${icon('timer')} Time per answer<select id="exam-duration"><option value="30">30 seconds</option><option value="45">45 seconds</option><option value="60">60 seconds</option></select></label><button type="button" class="primary" data-exam="start">${icon('play')} Start interview</button>${canSpeak ? '' : '<p class="helper">This browser cannot speak questions. Read each question on screen instead.</p>'}`;
 }
 
 function renderExamQuestion() {
@@ -297,7 +365,7 @@ function renderExamSummary() {
   clearExamTimer(); stopSpeech();
   const results = [...exam.results];
   const correct = results.filter(result => result.correct).length;
-  $('#exam-content').innerHTML = `<pre class="ascii-art" aria-hidden="true"> .-=-=-=-.\n \\       /\n  '.   .'\n    ) (\n  .'___'.</pre><h2>${results.length ? 'Interview complete' : 'No answers graded'}</h2><div class="exam-score">${correct}<span class="helper"> / ${results.length}</span></div><p>${results.length} of ${questions.length} questions answered</p><button type="button" class="primary" data-exam="restart">${icon('rotate-ccw')} New interview</button>${results.length ? `<details class="exam-review"><summary>Review your answers</summary><ol>${results.map(result => `<li>${icon(result.correct ? 'check' : 'x')} Q${result.id} · ${escapeHTML(questionById(result.id).q)}</li>`).join('')}</ol></details>` : ''}`;
+  $('#exam-content').innerHTML = `<span class="hero-icon" aria-hidden="true">${icon('trophy')}</span><h2>${results.length ? 'Interview complete' : 'No answers graded'}</h2><div class="exam-score">${correct}<span class="helper"> / ${results.length}</span></div><p>${results.length} of ${questions.length} questions answered</p><button type="button" class="primary" data-exam="restart">${icon('rotate-ccw')} New interview</button>${results.length ? `<details class="exam-review"><summary>Review your answers</summary><ol>${results.map(result => `<li>${icon(result.correct ? 'check' : 'x')} Q${result.id} · ${escapeHTML(questionById(result.id).q)}</li>`).join('')}</ol></details>` : ''}`;
   exam = null;
 }
 
@@ -320,7 +388,7 @@ function navigate() {
   nav.style.setProperty('--i', views.indexOf(activeView));
   // Enable the indicator slide only after its first placement, so the page never animates in from tab 0.
   if (!nav.classList.contains('nav-ready')) requestAnimationFrame(() => requestAnimationFrame(() => nav.classList.add('nav-ready')));
-  document.title = `${activeView === 'exam' ? 'Interview' : activeView[0].toUpperCase() + activeView.slice(1)} · Lucas Costa`;
+  document.title = `${viewTitles[activeView]} · Lucas Costa`;
 }
 
 function bindEvents() {
@@ -328,11 +396,13 @@ function bindEvents() {
   window.addEventListener('pagehide', () => { stopSpeech(); clearExamTimer(); if (recognition && listening) recognition.abort(); });
   $('#memory-mode').addEventListener('change', renderMemorize);
   $('#speech-rate').addEventListener('input', event => { speechRate = Number(event.target.value); $('#rate-value').value = `${speechRate.toFixed(1)}×`; });
-  $('#stop-speech').addEventListener('click', stopSpeech);
   $('#question-list').addEventListener('click', event => {
     const button = event.target.closest('button');
     if (!button) return;
-    if (button.dataset.speak) speak(questionById(button.dataset.speak).a);
+    if (button.dataset.speak) {
+      if (button === speakingButton) stopSpeech();
+      else speak(questionById(button.dataset.speak).a, button);
+    }
     if (button.classList.contains('cloze-word')) {
       button.replaceWith(document.createTextNode(button.dataset.word));
     }
@@ -412,7 +482,7 @@ async function initialize() {
     renderExamStart();
     setupDictation();
     bindEvents();
-    if (!canSpeak) { $('#speech-note').textContent = 'Text-to-speech is not available in this browser. Read the answers out loud to practice.'; $('#stop-speech').disabled = true; }
+    if (!canSpeak) $('#speech-note').textContent = 'Text-to-speech is not available in this browser. Read the answers out loud to practice.';
     $('#loading').hidden = true;
     navigate();
   } catch (error) {
@@ -422,4 +492,5 @@ async function initialize() {
 }
 
 setupTheme();
+setupSidebar();
 initialize();
